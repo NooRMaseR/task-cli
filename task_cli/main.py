@@ -95,6 +95,7 @@ class Task:
 
         self.__data['tasks'][index]['status'] = self.args.status
         self.save_data()
+        print("\nMarked Successfully.")
 
     def update_task(self) -> None:
         "update the task name by id"
@@ -106,6 +107,7 @@ class Task:
 
         self.__data["tasks"][index]["name"] = self.args.name
         self.save_data()
+        print("\nUpdated Successfully.")
 
     def delete_task(self) -> None:
         "delete task by id"
@@ -115,6 +117,7 @@ class Task:
         if index is not None:
             self.__data['tasks'].pop(index)
             self.save_data()
+            print("\nDeleted Successfully.")
 
     def add_task(self) -> None:
         """
@@ -130,6 +133,7 @@ class Task:
         self.__data["tasks"].append({"id": id, "name": name, "status": "todo"})
         print(f"Adding Task with id: {id}")
         self.save_data()
+        print("\nAdded Successfully.")
 
     @property
     def last_id(self) -> int:
@@ -153,7 +157,10 @@ class Task:
         # if no status provided then show all the tasks
         if self.args.status is None:
             print("Listing All tasks....\n")
-            return self.display_tasks(self.__data['tasks'])
+            self.display_tasks(self.__data['tasks'])
+            
+            print("\nOK")
+            return
 
         print(f"Listing {self.args.status} tasks....\n")
         dt = filter(lambda data: data["status"] == self.args.status, self.__data["tasks"])
@@ -185,16 +192,15 @@ class Task:
         with open(self.__data_file_name, "w") as f:
             json.dump(self.__data, f, indent=4)
 
-        print("Done.....")
 
     def load_data(self) -> None:
         "load the data from the data file and assing the data to `__data`"
         print(f"Loading data....", end=" ")
-        
+
         self.check_file()
         with open(self.__data_file_name, "r") as f:
             self.__data = json.load(f)
-            
+
         print("OK")
 
     def check_file(self) -> None:
@@ -202,7 +208,7 @@ class Task:
         if not os.path.exists(self.__data_file_name):
             with open(self.__data_file_name, "w") as f:
                 json.dump(self.__data, f, indent=4)
+            print("OK")
 
-
-if __name__ == "__main__":
+def main():
     Task()

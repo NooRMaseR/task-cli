@@ -5,6 +5,6 @@ setup(
     version="1.0",
     packages=find_packages(),
     entry_points= {
-        "console_scripts": ["task-cli=task_cli.main:Task"]
+        "console_scripts": ["task-cli=task_cli.main:main"]
     }
 )
