@@ -10,7 +10,9 @@ pip install .
 this will install the script as a cli in python packages, works as cross platform
 
 ## Usage
-`task-cli -h`
+```bash
+task-cli -h
+```
 
 output:
 ```bash
