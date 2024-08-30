@@ -3,6 +3,8 @@ import argparse
 import json
 import os
 
+DATA_FILE_NAME: Final[str] = "./data.json"
+AVAILABLE_STATUS: Final[tuple[str, str, str]] = ("todo", "in-progress", "done")
 
 class Task:
 
@@ -10,39 +12,37 @@ class Task:
 
         # CLI Configrations
         self.__data: dict[str, list[dict[str, str | int]]] = {"tasks": []}
-        self.__data_file_name: Final[str] = "./data.json"
-        self.__available_status: tuple[str, str, str] = ("todo", "in-progress", "done")
 
-        self.parser = argparse.ArgumentParser(
+        parser = argparse.ArgumentParser(
             prog="task-cli", # name of the app to use when the script is added to env path
             description="Task Tracker CLi"
         )
-        self.subparser = self.parser.add_subparsers(dest="command", help="commands")
+        subparser = parser.add_subparsers(dest="command", help="commands")
 
         # list command
-        self.list_command = self.subparser.add_parser("list", help="List all the tasks")
-        self.list_command.add_argument("status", type=str, nargs="?", choices=self.__available_status, help="list Tasks by status (optional)")
+        list_command = subparser.add_parser("list", help="List all the tasks")
+        list_command.add_argument("status", type=str, nargs="?", choices=AVAILABLE_STATUS, help="list Tasks by status (optional)")
 
         # add command
-        self.add_command = self.subparser.add_parser("add", help="add a task")
-        self.add_command.add_argument("name", type=str, help="Task Name")
+        add_command = subparser.add_parser("add", help="add a task")
+        add_command.add_argument("name", type=str, help="Task Name")
 
         # delete command
-        self.delete_command = self.subparser.add_parser("delete", help="delete a task")
-        self.delete_command.add_argument("id", type=int, help="Task ID")
+        delete_command = subparser.add_parser("delete", help="delete a task")
+        delete_command.add_argument("id", type=int, help="Task ID")
 
         # update command
-        self.update_command = self.subparser.add_parser("update", help="update a task")
-        self.update_command.add_argument("id", type=int, help="Task ID")
-        self.update_command.add_argument("name", type=str, help="New Name for the Task")
+        update_command = subparser.add_parser("update", help="update a task")
+        update_command.add_argument("id", type=int, help="Task ID")
+        update_command.add_argument("name", type=str, help="New Name for the Task")
 
         # mark command
-        self.mark_command = self.subparser.add_parser("mark", help="mark a task")
-        self.mark_command.add_argument("id", type=int, help="Task ID")
-        self.mark_command.add_argument("status", type=str, choices=self.__available_status, help="Change the Task status")
+        mark_command = subparser.add_parser("mark", help="mark a task")
+        mark_command.add_argument("id", type=int, help="Task ID")
+        mark_command.add_argument("status", type=str, choices=AVAILABLE_STATUS, help="Change the Task status")
 
-        self.args = self.parser.parse_args()
-        
+        self.args = parser.parse_args()
+
         if self.args.command:
             self.load_data()
             self.handel_subcommands()
@@ -132,16 +132,6 @@ class Task:
         self.save_data()
         print("\nAdded Successfully.")
 
-    @property
-    def last_id(self) -> int:
-        "get the last id from the data file"
-        try:
-            last_id: int =  int(self.__data["tasks"][-1]["id"])
-        except:
-            last_id = 0
-
-        return last_id
-
     def list_tasks(self) -> None:
         "show all the exists tasks by status"
 
@@ -149,7 +139,7 @@ class Task:
         if self.args.status is None:
             print("Listing All tasks....\n")
             self.display_tasks(self.__data['tasks'])
-            
+
             print("\nOK")
             return
 
@@ -168,38 +158,29 @@ class Task:
         for i in tasks:
             print(f"ID: {i['id']} - Task Name: {i['name']} - Status: {i['status']}")
 
+    @property
+    def last_id(self) -> int:
+        """Return the last task ID or 0 if no tasks exist."""
+        return int(self.__data["tasks"][-1]["id"]) if self.__data["tasks"] else 0
+
     def save_data(self) -> None:
-        "save the new data from `__data`"
-        ids: list[int] = []
-
-        # check if an id exists twice
-        for i in self.__data["tasks"]:
-            if i["id"] in ids:
-                print("this id is already exists")
-                return
-
-            ids.append(int(i["id"]))
-
-        with open(self.__data_file_name, "w") as f:
+        """Save task data to the data file."""
+        with open(DATA_FILE_NAME, "w") as f:
             json.dump(self.__data, f, indent=4)
 
-
     def load_data(self) -> None:
-        "load the data from the data file and assing the data to `__data`"
-        print(f"Loading data....", end=" ")
+        """Load task data from the data file."""
+        if not os.path.exists(DATA_FILE_NAME):
+            self.create_data_file()
 
-        self.check_file()
-        with open(self.__data_file_name, "r") as f:
+        with open(DATA_FILE_NAME, "r") as f:
             self.__data = json.load(f)
 
-        print("OK")
+    def create_data_file(self) -> None:
+        """Create an empty data file if it doesn't exist."""
+        with open(DATA_FILE_NAME, "w") as f:
+            json.dump({"tasks": []}, f, indent=4)
 
-    def check_file(self) -> None:
-        "check if the data file is exists, if not then create a new empty one"
-        if not os.path.exists(self.__data_file_name):
-            with open(self.__data_file_name, "w") as f:
-                json.dump(self.__data, f, indent=4)
-            print("OK")
 
 def main():
     Task()
