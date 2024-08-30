@@ -42,6 +42,8 @@ class Task:
         self.mark_command.add_argument("status", type=str, choices=self.__available_status, help="Change the Task status")
 
         self.args = self.parser.parse_args()
+        self.load_data()
+        
         if self.args.command:
             self.handel_subcommands()
 
@@ -68,7 +70,6 @@ class Task:
         """
         get the task index from the `__data`
         
-        make sure to call `self.load_data()` before calling this method
         Args:
             id (int):
                 the task id
@@ -87,7 +88,6 @@ class Task:
     def mark_task(self) -> None:
         "set the task status by id with one of the available status"
 
-        self.load_data()
         index: int | None = self.get_task_index(int(self.args.id))
 
         if index is None:
@@ -99,7 +99,6 @@ class Task:
 
     def update_task(self) -> None:
         "update the task name by id"
-        self.load_data()
 
         index: int | None = self.get_task_index(int(self.args.id))
         if index is None:
@@ -111,7 +110,6 @@ class Task:
 
     def delete_task(self) -> None:
         "delete task by id"
-        self.load_data()
 
         index: int | None = self.get_task_index(int(self.args.id))
         if index is not None:
@@ -125,7 +123,6 @@ class Task:
         
         the `id` is auto generated based on the last id in the data file
         """
-        self.load_data()
         name: str = self.args.name
 
         id = self.last_id + 1
@@ -137,11 +134,7 @@ class Task:
 
     @property
     def last_id(self) -> int:
-        """
-        get the last id from the data file
-        
-        make sure to call `self.load_data()` before calling this property
-        """
+        "get the last id from the data file"
         try:
             last_id: int =  int(self.__data["tasks"][-1]["id"])
         except:
@@ -151,8 +144,6 @@ class Task:
 
     def list_tasks(self) -> None:
         "show all the exists tasks by status"
-
-        self.load_data()
 
         # if no status provided then show all the tasks
         if self.args.status is None:
