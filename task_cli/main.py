@@ -42,9 +42,9 @@ class Task:
         self.mark_command.add_argument("status", type=str, choices=self.__available_status, help="Change the Task status")
 
         self.args = self.parser.parse_args()
-        self.load_data()
         
         if self.args.command:
+            self.load_data()
             self.handel_subcommands()
 
     def handel_subcommands(self) -> None:
