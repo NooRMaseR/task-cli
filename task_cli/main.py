@@ -147,8 +147,7 @@ class Task:
         """
         prints the tasks in a nice format
         Args:
-            tasks (Iterable[dict]):
-                the tasks to display as Iterable that containes `dict`
+            tasks (Iterable[dict[str, str | int]]): the tasks to display as Iterable that containes `dict`
         """
         for i in tasks:
             print(f"ID: {i['id']} - Task Name: {i['name']} - Status: {i['status']}")
