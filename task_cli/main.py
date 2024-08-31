@@ -1,4 +1,4 @@
-from typing import Final, Iterable
+from typing import Callable, Final, Iterable
 import argparse
 import json
 import os
@@ -50,29 +50,24 @@ class Task:
     def handel_subcommands(self) -> None:
         "handel the subcommands"
 
-        match self.args.command:
-            case "list":
-                self.list_tasks()
+        commands: dict[str, Callable[[], None]] = {
+            "list": self.list_tasks,
+            "add": self.add_task,
+            "delete": self.delete_task,
+            "update": self.update_task,
+            "mark": self.mark_task,
+        }
 
-            case "add":
-                self.add_task()
-
-            case "delete":
-                self.delete_task()
-
-            case "update":
-                self.update_task()
-
-            case "mark":
-                self.mark_task()
+        action: Callable[[], None] | None = commands.get(self.args.command)
+        if action:
+            action()
 
     def get_task_index(self, id: int) -> int | None:
         """
         get the task index from the `__data`
         
         Args:
-            id (int):
-                the task id
+            id (int): the task id
         """
         try:
             item = list(filter(lambda data: data["id"] == id, self.__data["tasks"]))
